@@ -169,8 +169,8 @@ public class MyTabbedActivity extends Activity {
         textview.setMovementMethod(new ScrollingMovementMethod());
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        String host = settings.getString("pref_host", "10.10.100.251");
-        int port = Integer.parseInt(settings.getString("pref_port", "8981"));
+        String host = settings.getString("pref_host", "10.10.100.254");
+        int port = Integer.parseInt(settings.getString("pref_port", "8899"));
 
         Log.i("", "host: " + host);
         Log.i("", "port: " + port);

@@ -9,10 +9,10 @@
     <string name="pref_description_social_recommendations">Recommendations for people to contact based on your message history</string>
 
     <string name="pref_title_host">Host</string>
-    <string name="pref_default_host">10.10.100.252</string>
+    <string name="pref_default_host">10.10.100.254</string>
 
     <string name="pref_title_port">Port</string>
-    <string name="pref_default_port">8982</string>
+    <string name="pref_default_port">8899</string>
 
     <string name="pref_title_log_file">Log file name</string>
     <string name="pref_default_log_file">hx19.log</string>
