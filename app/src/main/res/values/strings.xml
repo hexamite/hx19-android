@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">HX-19 Monitor</string>
+    <string name="title_activity_my_tabbed">HX-19 Monitor</string>
+    <string name="title_section1">Section 1</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_sync_on">Start sync</string>
+    <string name="action_sync_off">Stop sync</string>
+    <string name="action_log">Log to file</string>
+    <string name="action_connect">Connect to device</string>
+
+</resources>

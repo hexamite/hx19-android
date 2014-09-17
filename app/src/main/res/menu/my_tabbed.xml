@@ -1,0 +1,31 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="hexamite.com.mapp.MyTabbedActivity" >
+
+    <item android:id="@+id/action_connect"
+        android:title="@string/action_connect"
+        android:checkable="true"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
+
+    <item android:id="@+id/action_log"
+        android:title="@string/action_log"
+        android:checkable="true"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
+
+    <item android:id="@+id/action_sync_on"
+        android:title="@string/action_sync_on"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
+
+    <item android:id="@+id/action_sync_off"
+        android:title="@string/action_sync_off"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
+
+    <item android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
+</menu>
