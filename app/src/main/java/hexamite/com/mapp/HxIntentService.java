@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Collections;
@@ -40,12 +41,12 @@ public class HxIntentService extends IntentService {
 
     private static Intent listenIntent;
 
-    private static List<String> commands = Collections.synchronizedList(new LinkedList<String>());
+    private static List<String> messaagesOut = Collections.synchronizedList(new LinkedList<String>());
     public static volatile boolean stateConnected;
     public static volatile boolean commandDisconnect;
 
-    public static void addCommand(String command) {
-        commands.add(command);
+    public static void addMessageOut(String messageOut) {
+        messaagesOut.add(messageOut);
     }
 
     public HxIntentService() {
@@ -112,40 +113,35 @@ public class HxIntentService extends IntentService {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
-            String line = readOrTimeOut(reader);
             while (socket != null && !socket.isClosed() && !commandDisconnect) {
-                if(line != null) {
+                try {
+                    String line = reader.readLine();
                     Intent intent = new Intent(ACTION_RECEIVE_MESSAGE);
                     intent.putExtra("LINE", line);
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                } catch(SocketTimeoutException e) {
+                    // ignore
                 }
-                writeCommands();
-                line =  readOrTimeOut(reader);
+                writeMessagesOut();
             }
 
+        } catch (ConnectException e) {
+            Toast.makeText(getApplicationContext(), "No connection. (" + e.getMessage() + ")", Toast.LENGTH_LONG).show();
+            Log.e("", "Exception: " + e);
         } catch (IOException e) {
-            Toast.makeText(getApplicationContext(), "No connection.", Toast.LENGTH_LONG).show();
-            Log.i("", "Exception: " + e);
-            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "No connection. (" + e.getMessage() + ")", Toast.LENGTH_LONG).show();
+            Log.e("", "Exception: " + e);
         } finally {
             disconnect();
         }
     }
 
-    private void writeCommands() throws IOException {
-        while(!commands.isEmpty()) {
-            String command = commands.remove(0);
-            output.write(pack(command));
+    private void writeMessagesOut() throws IOException {
+        while(!messaagesOut.isEmpty()) {
+            String messageOut = messaagesOut.remove(0);
+            output.write(pack(messageOut));
         }
         output.flush();
-    }
-
-    private String readOrTimeOut(BufferedReader reader) throws IOException {
-        try {
-            return reader.readLine();
-        } catch(SocketTimeoutException e) {
-            return null;
-        }
     }
 
     private synchronized void disconnect() {

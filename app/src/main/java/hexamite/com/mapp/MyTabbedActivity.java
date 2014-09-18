@@ -24,7 +24,6 @@ import android.support.v4.view.ViewPager;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,15 +53,20 @@ public class MyTabbedActivity extends Activity {
     private File logFile;
     Menu menu;
 
+    private String prefHost = "10.10.100.254";
+    private int prefPort = 8899;
+    private String prefLogFile = "hx19.log";
+    private int prefLogViewNumLines = 100;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_tabbed);
 
-
-
-        // Create the adapter that will return a fragment for each of the three
+        // Create the adapter that will return a fragment for the only
         // primary sections of the activity.
+
         mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
@@ -72,8 +76,15 @@ public class MyTabbedActivity extends Activity {
         IntentFilter intentFilter = new IntentFilter(HxIntentService.ACTION_RECEIVE_MESSAGE);
         LocalBroadcastManager.getInstance(getBaseContext()).registerReceiver(new Hx19MessageReceiver(), intentFilter);
 
-    }
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        OnSharedPreferenceChangeListener preferenceChangeListener = new OnSharedPreferenceChangeListener();
+        preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
 
+        preferenceChangeListener.onSharedPreferenceChanged(preferences, "pref_host");
+        preferenceChangeListener.onSharedPreferenceChanged(preferences, "pref_port");
+        preferenceChangeListener.onSharedPreferenceChanged(preferences, "pref_log_file");
+        preferenceChangeListener.onSharedPreferenceChanged(preferences, "pref_logview_num_lines");
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -132,9 +143,7 @@ public class MyTabbedActivity extends Activity {
     private void startLog() {
         Log.i("", "startLog()");
         try {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-            String name = settings.getString("pref_log_file", "hx19.log");
-            logFile = new File(getBaseContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), name);
+            logFile = new File(getBaseContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), prefLogFile);
             // logFile = new File(getBaseContext().getFilesDir(), name);
             logWriter = new BufferedWriter(new FileWriter(logFile));
             Log.i("", "Log file: " + logFile.getAbsolutePath());
@@ -172,9 +181,6 @@ public class MyTabbedActivity extends Activity {
         String host = settings.getString("pref_host", "10.10.100.254");
         int port = Integer.parseInt(settings.getString("pref_port", "8899"));
 
-        Log.i("", "host: " + host);
-        Log.i("", "port: " + port);
-
         HxIntentService.connect(getApplicationContext(), host, port);
     }
 
@@ -184,15 +190,31 @@ public class MyTabbedActivity extends Activity {
     }
 
     private void sendMessage(String message) {
-        HxIntentService.addCommand(message);
+        HxIntentService.addMessageOut(message);
     }
 
     private boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
+        if(Environment.MEDIA_MOUNTED.equals(state)) {
             return true;
         }
         return false;
+    }
+
+     public class OnSharedPreferenceChangeListener implements SharedPreferences.OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            Log.i("", "OnPreferenceChange: " + key);
+            if("pref_host".equals(key)) {
+                prefHost = sharedPreferences.getString(key, prefHost);
+            } else if("pref_port".equals(key)) {
+                prefPort = Integer.parseInt(sharedPreferences.getString(key, "" + prefPort));
+            } else if("pref_log_file".equals(key)) {
+                prefLogFile = sharedPreferences.getString(key, prefLogFile);
+            } else if("pref_log_view_num_lines".equals(key)) {
+                prefLogViewNumLines = Integer.parseInt(sharedPreferences.getString(key, "" + prefLogViewNumLines));
+            }
+        }
     }
 
     public class Hx19MessageReceiver extends BroadcastReceiver {
@@ -203,6 +225,12 @@ public class MyTabbedActivity extends Activity {
             if(textView != null) {
                 String line = intent.getCharSequenceExtra("LINE") + "\n";
                 textView.append(line);
+                while (textView.getLineCount() > prefLogViewNumLines) {
+                    int i = indexOfEOL(textView.getText());
+                    if (i >= 0) {
+                        textView.getEditableText().delete(0, i + 1);
+                    }
+                }
                 if(logWriter != null) {
                     try {
                         logWriter.append(line);
@@ -212,6 +240,15 @@ public class MyTabbedActivity extends Activity {
                     }
                 }
             }
+        }
+
+        private int indexOfEOL(CharSequence text) {
+            for(int i = 0; i < text.length(); i++) {
+                if(text.charAt(i) == '\n' || text.charAt(i) == '\r') {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 

@@ -70,6 +70,7 @@ public class Settings extends PreferenceActivity {
         bindPreferenceSummaryToValue(findPreference("pref_host"));
         bindPreferenceSummaryToValue(findPreference("pref_port"));
         bindPreferenceSummaryToValue(findPreference("pref_log_file"));
+        bindPreferenceSummaryToValue(findPreference("pref_log_view_num_lines"));
     }
 
     /** {@inheritDoc} */
@@ -154,9 +155,10 @@ public class Settings extends PreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
 
-            bindPreferenceSummaryToValue(findPreference("pref_log_file"));
             bindPreferenceSummaryToValue(findPreference("pref_host"));
             bindPreferenceSummaryToValue(findPreference("pref_port"));
+            bindPreferenceSummaryToValue(findPreference("pref_log_file"));
+            bindPreferenceSummaryToValue(findPreference("pref_log_view_num_lines"));
         }
     }
 
